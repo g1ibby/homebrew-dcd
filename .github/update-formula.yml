@@ -1,0 +1,64 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [version-update]
+
+permissions:
+  contents: write
+
+jobs:
+  update_formula:
+    name: Update DCD Formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update formula with new version
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          SHA256_INTEL="${{ github.event.client_payload.sha256_intel }}"
+          SHA256_ARM="${{ github.event.client_payload.sha256_arm }}"
+          
+          echo "Updating DCD formula to version $VERSION"
+          echo "Intel SHA256: $SHA256_INTEL"
+          echo "ARM SHA256: $SHA256_ARM"
+          
+          # Generate formula from template
+          cp Formula/dcd.rb.template Formula/dcd.rb
+          
+          # Update the formula file with actual values
+          sed -i "s/__VERSION__/$VERSION/g" Formula/dcd.rb
+          sed -i "s/__SHA256_INTEL__/$SHA256_INTEL/g" Formula/dcd.rb
+          sed -i "s/__SHA256_ARM__/$SHA256_ARM/g" Formula/dcd.rb
+
+      - name: Verify formula syntax
+        run: |
+          # Basic syntax check
+          ruby -c Formula/dcd.rb
+          echo "Formula syntax is valid"
+
+      - name: Commit and push formula update
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add Formula/dcd.rb
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git commit -m "Update DCD formula to v${{ github.event.client_payload.version }}"
+          git push
+
+      - name: Create release tag
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          git tag -a "v$VERSION" -m "DCD v$VERSION"
+          git push origin "v$VERSION"
