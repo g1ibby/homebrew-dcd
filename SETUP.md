@@ -40,7 +40,7 @@ curl -X POST \
   -H "Authorization: Bearer $HOMEBREW_TAP_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/g1ibby/homebrew-dcd/dispatches \
-  -d '{"event_type":"version-update","client_payload":{"version":"0.2.2","sha256_intel":"abc123","sha256_arm":"def456"}}'
+  -d '{"event_type":"version-update","client_payload":{"version":"0.2.3","sha256_intel":"d472ca0fc5bb77d4f84bfff617b54258579dcdb64c164e9a840824af66340d78","sha256_arm":"393d9ef83145d0d947ce7c18a3564233740c9678f13b1f23a15502b053523cf4"}}'
 ```
 
 ## 🔧 File Structure in homebrew-dcd
